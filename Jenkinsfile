@@ -21,7 +21,7 @@ pipeline {
         stage("Build"){
             steps{
                 echo "Building the code"
-                sh "docker build . -t docker-p"
+                sh "docker build . -t newapp"
             }
         }
         stage("Deploy"){
@@ -30,6 +30,14 @@ pipeline {
                 sh "docker-compose down && docker-compose up -d"
             }
         }
+      stage("Push to Dockerhub"){
+        steps{
+          echo "push image to docker hub"
+          withCredentials([usernamePassword(credentialsId:"dockerhubid",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
+          sh "docker tag newapp ${env.dockerHubUser}/myapp:latest"
+          sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+          sh "docker push ${env.dockerHubUser}/myapp:latest"
+          }
     }
 }
 
